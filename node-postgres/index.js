@@ -26,13 +26,17 @@ app.post('/', (req, res) => {
   .then(response => {
     // console.log(response);
     console.log("We are in the main home 1");
-    res.status(200).send(response);
+    // console.log ("What is the response that we are getting?");
+    // res.status(200).send(response);
     // console.log("the data is:");
     // console.log(response)
-    fin_data = response.rows;
+    // console.log(response);
+    // fin_data = response;
     console.log("the data is")
-    console.log(fin_data)
-    res.send(fin_data)
+    // console.log(fin_data)
+    // res.send(fin_data)
+    console.log(response);
+    res.status(200).send(response)
     // res.send ("Success!")
     // res.send(JSON.stringify(results));
   })
