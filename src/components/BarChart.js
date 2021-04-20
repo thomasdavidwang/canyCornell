@@ -86,6 +86,7 @@ function BarChart({ margin, w, h, data }) {
   const height = h - margin.top - margin.bottom;
 
   useEffect(() => {
+    console.log("top");
     const svg = d3
       .select(ref.current)
       .attr("class", "bar")
@@ -93,22 +94,29 @@ function BarChart({ margin, w, h, data }) {
       .attr("height", height + margin.bottom + margin.top)
       .append("g")
       .attr("transform",
-        "translate(" + margin.left + "," + 0 + ")")
+        "translate(" + margin.left + "," + 0 + ")");
+
     var x = d3.scaleBand()
       .range([0, width])
       .padding(0.4);
+    //(- margin.left)
     var xAxis = svg.append("g")
-      .attr("transform", "translate(" + (- margin.left) + "," + (height) + ")")
-      .attr("class", "xaxis")
-    xAxis.call(d3.axisBottom(x))
+      .attr("transform", "translate(" + 0 + "," + (height) + ")")
+      .attr("class", "xaxis");
+
+    xAxis.call(d3.axisBottom(x));
+
     var y = d3.scaleLinear()
       .range([height, 0]);
-    var yAxis = svg.append("g").attr("class", "yaxis")
-      .attr("transform", "translate(0," + 0 + ")")
+
+    var yAxis = svg.append("g")
+        .attr("class", "yaxis");
+
     yAxis.call(d3.axisLeft(y));
   }, []);
 
   useEffect(() => {
+    console.log("draw");
     draw();
   }, [data]);
 
@@ -123,7 +131,7 @@ function BarChart({ margin, w, h, data }) {
     var y = d3.scaleLinear()
       .range([height, margin.top]);
     var yAxis = svg.selectAll(".yaxis")
-    const colors = generateColor("#51626A", "#51B2B8", data.length)
+    const colors = generateColor("#51626A", "#51b2b8", data.length)
     shuffle(colors)
 
     var groups = d3.map(data, function (d) { return (d.tag) })
@@ -131,11 +139,19 @@ function BarChart({ margin, w, h, data }) {
     // Update the X axis
     x.domain(groups)
     xAxis.call(d3.axisBottom(x))
+        .selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)");
 
     // Update the Y axis
-    y.domain([0, d3.max(data, function (d) { return d.count })]);
+    let maxVar = d3.max(data, (d) => {return parseInt(d.count);})
+    y.domain([0, maxVar]);
 
-    yAxis.call(d3.axisLeft(y));
+    yAxis
+        .attr("transform", "translate(0,0)")
+        .call(d3.axisLeft(y));
 
     var div = d3.select("body").append("div")
       .attr("class", "tooltip")
@@ -143,12 +159,13 @@ function BarChart({ margin, w, h, data }) {
 
     // Create the u variable
     var u = svg.selectAll("rect")
-      .data(data)
+        .data(data);
+
     u
       .enter()
-      .append("rect") // Add a new rect for each new elements
+        .append("rect") // Add a new rect for each new elements
       .merge(u) // get the already existing elements as well
-      .attr("x", function (d) { return x(d.tag); })
+      .attr("x", function (d) { return x(d.tag) + ( margin.left); })
       .attr("class", "sBar")
       .attr("y", function (d) { return y(d.count); })
       .attr("width", x.bandwidth())
@@ -156,7 +173,6 @@ function BarChart({ margin, w, h, data }) {
       .attr("text", ((d) => ("Group: " + d.tag + "\n"
         + "Value: " + d.count)))
       .attr("fill", function (d) {
-        console.log(data.indexOf(d));
         return colors[data.indexOf(d)]
       });
 
@@ -165,7 +181,7 @@ function BarChart({ margin, w, h, data }) {
 
 
     // this part is for the hover function
-    u.on('mouseover', function (event) {
+    u.on('mouseover', () => {
       d3.select(this).transition()
         .duration(1)
         .attr('opacity', '.85');
@@ -181,7 +197,7 @@ function BarChart({ margin, w, h, data }) {
           .style("left", x + 10 + 'px')
           .style("top", y + 10 + 'px');
       })
-      .on('mouseout', function (d) {
+      .on('mouseout', () => {
         d3.select(this).transition()
           .duration('1')
           .attr('opacity', '1');
@@ -196,8 +212,6 @@ function BarChart({ margin, w, h, data }) {
       .remove()
 
   }
-  
-
 
   const styles = {
     container: {
